@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EarnMax - Points & Rewards App</title>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6794851357390069" crossorigin="anonymous"></script>
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --secondary: #2196F3;
+            --dark: #333;
+            --light: #f5f5f5;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0;
+            background-color: var(--light);
+            color: var(--dark);
+        }
+        .header {
+            background: linear-gradient(135deg, var(--primary), #2E7D32);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .points-display {
+            background: linear-gradient(135deg, var(--secondary), #1565C0);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 24px;
+            margin: 0 20px 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .tab-container {
+            display: flex;
+            margin: 0 20px 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        .tab.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        .section {
+            display: none;
+            padding: 0 20px;
+        }
+        .section.active {
+            display: block;
+        }
+        .card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .task-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        .task-card {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            transition: transform 0.2s;
+        }
+        .task-card:hover {
+            transform: translateY(-2px);
+        }
+        .task-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 18px;
+        }
+        .task-details {
+            flex: 1;
+        }
+        .task-points {
+            color: var(--primary);
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            min-width: 80px;
+        }
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        .btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-secondary {
+            background-color: var(--secondary);
+        }
+        .ad-container {
+            margin: 20px;
+            text-align: center;
+            min-height: 100px;
+            background-color: #e9e9e9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .referral-code {
+            background-color: #f0f7ff;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 20px;
+            font-weight: bold;
+            margin: 15px 0;
+            border: 2px dashed var(--secondary);
+        }
+        .copy-btn {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: block;
+            margin: 0 auto;
+            transition: all 0.3s;
+        }
+        .copy-btn:hover {
+            opacity: 0.9;
+        }
+        .reward-card {
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #f9f9f9;
+            border-radius: 0 8px 8px 0;
+        }
+        .reward-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .reward-points {
+            color: var(--primary);
+            font-weight: bold;
+        }
+        .success-message {
+            background-color: #e8f5e9;
+            color: #2E7D32;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            border-left: 4px solid #4CAF50;
+        }
+        .task-completed {
+            position: relative;
+            opacity: 0.7;
+        }
+        .task-completed::after {
+            content: "✓ COMPLETED";
+            position: absolute;
+            right: 10px;
+            background-color: var(--primary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .category-title {
+            color: var(--primary);
+            font-weight: 600;
+            margin: 20px 0 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>EarnMax Rewards</h1>
+        <p>Complete tasks, refer friends, and earn amazing rewards!</p>
+    </div>
+<!-- Banner Ad Unit -->
+<div class="ad-container">
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-3940256099942544"
+         data-ad-slot="6300978111"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+         (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+</div>
+
+
+    <div class="points-display">
+        <div style="font-size: 14px;">YOUR POINTS BALANCE</div>
+        <span id="pointsCounter">0</span> Points
+    </div>
+
+    <div class="tab-container">
+        <div class="tab active" onclick="showSection('tasks')">🛠️ Earn</div>
+        <div class="tab" onclick="showSection('referral')">👥 Refer</div>
+        <div class="tab" onclick="showSection('redeem')">🎁 Redeem</div>
+    </div>
+
+    <!-- Tasks Section -->
+    <div id="tasksSection" class="section active">
+        <div class="card">
+            <h2 style="margin-top: 0;">Daily Tasks</h2>
+            
+            <div class="category-title">📺 Watch & Earn</div>
+            <div class="task-grid">
+                <div class="task-card" id="task1">
+                    <div class="task-icon">▶️</div>
+                    <div class="task-details">Watch a short video</div>
+                    <div class="task-points">+10</div>
+                    <button class="btn" onclick="completeTask('task1', 10)">Start</button>
+                </div>
+                <div class="task-card" id="task2">
+                    <div class="task-icon">🎬</div>
+                    <div class="task-details">Watch full video (3 min)</div>
+                    <div class="task-points">+25</div>
+                    <button class="btn" onclick="completeTask('task2', 25)">Start</button>
+                </div>
+            </div>
+
+            <div class="category-title">📝 Surveys & Quizzes</div>
+            <div class="task-grid">
+                <div class="task-card" id="task3">
+                    <div class="task-icon">📊</div>
+                    <div class="task-details">Complete quick survey</div>
+                    <div class="task-points">+15</div>
+                    <button class="btn" onclick="completeTask('task3', 15)">Start</button>
+                </div>
+                <div class="task-card" id="task4">
+                    <div class="task-icon">🧠</div>
+                    <div class="task-details">Solve daily quiz</div>
+                    <div class="task-points">+20</div>
+                    <button class="btn" onclick="completeTask('task4', 20)">Start</button>
+                </div>
+                <div class="task-card" id="task5">
+                    <div class="task-icon">📋</div>
+                    <div class="task-details">Detailed survey (5 min)</div>
+                    <div class="task-points">+50</div>
+                    <button class="btn" onclick="completeTask('task5', 50)">Start</button>
+                </div>
+            </div>
+
+            <div class="category-title">📱 App Tasks</div>
+            <div class="task-grid">
+                <div class="task-card" id="task6">
+                    <div class="task-icon">⬇️</div>
+                    <div class="task-details">Install recommended app</div>
+                    <div class="task-points">+80</div>
+                    <button class="btn" onclick="completeTask('task6', 80)">Start</button>
+                </div>
+                <div class="task-card" id="task7">
+                    <div class="task-icon">⭐</div>
+                    <div class="task-details">Rate an app</div>
+                    <div class="task-points">+30</div>
+                    <button class="btn" onclick="completeTask('task7', 30)">Start</button>
+                </div>
+                <div class="task-card" id="task8">
+                    <div class="task-icon">🔍</div>
+                    <div class="task-details">Search using our app</div>
+                    <div class="task-points">+5</div>
+                    <button class="btn" onclick="completeTask('task8', 5)">Start</button>
+                </div>
+            </div>
+
+            <div class="category-title">🎮 Game Tasks</div>
+            <div class="task-grid">
+                <div class="task-card" id="task9">
+                    <div class="task-icon">🎯</div>
+                    <div class="task-details">Play game for 5 minutes</div>
+                    <div class="task-points">+40</div>
+                    <button class="btn" onclick="completeTask('task9', 40)">Start</button>
+                </div>
+                <div class="task-card" id="task10">
+                    <div class="task-icon">🏆</div>
+                    <div class="task-details">Reach level 3 in game</div>
+                    <div class="task-points">+100</div>
+                    <button class="btn" onclick="completeTask('task10', 100)">Start</button>
+                </div>
+            </div>
+
+            <div class="category-title">💌 Social Tasks</div>
+            <div class="task-grid">
+                <div class="task-card" id="task11">
+                    <div class="task-icon">👍</div>
+                    <div class="task-details">Like our Facebook page</div>
+                    <div class="task-points">+25</div>
+                    <button class="btn" onclick="completeTask('task11', 25)">Start</button>
+                </div>
+                <div class="task-card" id="task12">
+                    <div class="task-icon">📢</div>
+                    <div class="task-details">Share on social media</div>
+                    <div class="task-points">+30</div>
+                    <button class="btn" onclick="completeTask('task12', 30)">Start</button>
+                </div>
+                <div class="task-card" id="task13">
+                    <div class="task-icon">✉️</div>
+                    <div class="task-details">Invite friends via WhatsApp</div>
+                    <div class="task-points">+50</div>
+                    <button class="btn" onclick="completeTask('task13', 50)">Start</button>
+                </div>
+            </div>
+
+            <div class="category-title">🎁 Special Tasks</div>
+            <div class="task-grid">
+                <div class="task-card" id="task14">
+                    <div class="task-icon">📅</div>
+                    <div class="task-details">Daily login streak (Day 3)</div>
+                    <div class="task-points">+20</div>
+                    <button class="btn" onclick="completeTask('task14', 20)">Start</button>
+                </div>
+                <div class="task-card" id="task15">
+                    <div class="task-icon">🎂</div>
+                    <div class="task-details">Birthday special task</div>
+                    <div class="task-points">+200</div>
+                    <button class="btn" onclick="completeTask('task15', 200)">Start</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="ad-container">
+            <!-- Rewarded Ad Unit -->
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-6794851357390069"
+                 data-ad-slot="9660760769"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+    </div>
+
+    <!-- Referral Section -->
+    <div id="referralSection" class="section">
+        <div class="card">
+            <h2 style="margin-top: 0;">👥 Refer & Earn</h2>
+            <p>Share your referral code and earn <strong>50 points</strong> for each friend who joins and completes their first task!</p>
+            
+            <div class="referral-code" id="userReferralCode">LOADING...</div>
+            <button class="copy-btn" onclick="copyReferralCode()">📋 Copy Referral Code</button>
+            
+            <div style="margin-top: 20px; background-color: #f0f7ff; padding: 15px; border-radius: 8px;">
+                <h3 style="margin-top: 0;">Your Referral Progress</h3>
+                <p>Total Referrals: <strong><span id="totalReferrals">0</span></strong></p>
+                <p>Earned from Referrals: <strong><span id="referralPoints">0</span> points</strong></p>
+            </div>
+            
+            <h3 style="margin-top: 20px;">🎯 How it works:</h3>
+            <ol style="padding-left: 20px;">
+                <li>Share your unique referral code with friends</li>
+                <li>They sign up using your code</li>
+                <li>You get <strong>50 points</strong> when they complete their first task</li>
+                <li>No limit on how many friends you can refer!</li>
+            </ol>
+            
+            <h3 style="margin-top: 20px;">📤 Share Options:</h3>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button class="btn-secondary" style="flex: 1;" onclick="shareViaWhatsApp()">WhatsApp</button>
+                <button class="btn-secondary" style="flex: 1;" onclick="shareViaFacebook()">Facebook</button>
+                <button class="btn-secondary" style="flex: 1;" onclick="copyReferralLink()">Copy Link</button>
+            </div>
+            
+            <div id="referralSuccess" class="success-message" style="display: none; margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <!-- Redeem Section -->
+    <div id="redeemSection" class="section">
+        <div class="card">
+            <h2 style="margin-top: 0;">🎁 Redeem Your Points</h2>
+            <p style="font-size: 18px;">Current Balance: <strong><span id="redeemPoints">0</span> points</strong></p>
+            
+            <div class="reward-card">
+                <div class="reward-title">₹10 Paytm Cash</div>
+                <p>Get instant ₹10 to your Paytm wallet</p>
+                <div class="reward-points">100 points</div>
+                <button class="btn" onclick="redeemReward(100, '₹10 Paytm Cash')" style="margin-top: 10px;">Redeem Now</button>
+            </div>
+            
+            <div class="reward-card">
+                <div class="reward-title">₹50 Amazon Gift Card</div>
+                <p>Email delivery within 24 hours</p>
+                <div class="reward-points">500 points</div>
+                <button class="btn" onclick="redeemReward(500, '₹50 Amazon Gift Card')" style="margin-top: 10px;">Redeem Now</button>
+            </div>
+            
+            <div class="reward-card">
+                <div class="reward-title">₹100 Mobile Recharge</div>
+                <p>Any network recharge</p>
+                <div class="reward-points">1000 points</div>
+                <button class="btn" onclick="redeemReward(1000, '₹100 Mobile Recharge')" style="margin-top: 10px;">Redeem Now</button>
+            </div>
+            
+            <div class="reward-card">
+                <div class="reward-title">Special Mystery Box</div>
+                <p>Random reward worth ₹10-₹100</p>
+                <div class="reward-points">200 points</div>
+                <button class="btn" onclick="redeemReward(200, 'Mystery Box')" style="margin-top: 10px;">Redeem Now</button>
+            </div>
+            
+            <div id="redeemSuccess" class="success-message" style="display: none; margin-top: 20px;"></div>
+        </div>
+    </div>
+
+    <div class="ad-container">
+        <!-- App Open Ad Unit -->
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-6794851357390069"
+             data-ad-slot="1679147203"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+
+    <script>
+        // User Data
+        let userData = {
+            points: 0,
+            referralCode: '',
+            completedTasks: [],
+            referrals: 0,
+            referralPoints: 0,
+            redeemedRewards: []
+        };
+        
+        // Reward Options
+        const rewards = [
+            { id: 1, name: "₹10 Paytm Cash", points: 100 },
+            { id: 2, name: "₹50 Amazon Gift Card", points: 500 },
+            { id: 3, name: "₹100 Mobile Recharge", points: 1000 },
+            { id: 4, name: "Mystery Box", points: 200 }
+        ];
+        
+        // Tasks Data
+        const tasks = [
+            { id: 'task1', name: "Watch a short video", points: 10, category: "watch" },
+            { id: 'task2', name: "Watch full video (3 min)", points: 25, category: "watch" },
+            { id: 'task3', name: "Complete quick survey", points: 15, category: "survey" },
+            { id: 'task4', name: "Solve daily quiz", points: 20, category: "survey" },
+            { id: 'task5', name: "Detailed survey (5 min)", points: 50, category: "survey" },
+            { id: 'task6', name: "Install recommended app", points: 80, category: "app" },
+            { id: 'task7', name: "Rate an app", points: 30, category: "app" },
+            { id: 'task8', name: "Search using our app", points: 5, category: "app" },
+            { id: 'task9', name: "Play game for 5 minutes", points: 40, category: "game" },
+            { id: 'task10', name: "Reach level 3 in game", points: 100, category: "game" },
+            { id: 'task11', name: "Like our Facebook page", points: 25, category: "social" },
+            { id: 'task12', name: "Share on social media", points: 30, category: "social" },
+            { id: 'task13', name: "Invite friends via WhatsApp", points: 50, category: "social" },
+            { id: 'task14', name: "Daily login streak (Day 3)", points: 20, category: "special" },
+            { id: 'task15', name: "Birthday special task", points: 200, category: "special" }
+        ];
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserData();
+            updateUI();
+        });
+        
+        function loadUserData() {
+            const savedData = localStorage.getItem('earnMaxUserData');
+            if(savedData) {
+                userData = JSON.parse(savedData);
+            } else {
+                // Generate new referral code
+                userData.referralCode = generateReferralCode();
+                saveUserData();
+            }
+        }
+        
+        function saveUserData() {
+            localStorage.setItem('earnMaxUserData', JSON.stringify(userData));
+        }
+        
+        function generateReferralCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let result = '';
+            for (let i = 0; i < 6; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+        
+        function updateUI() {
+            // Update points display
+            document.getElementById('pointsCounter').textContent = userData.points;
+            document.getElementById('redeemPoints').textContent = userData.points;
+            
+            // Update referral info
+            document.getElementById('userReferralCode').textContent = userData.referralCode;
+            document.getElementById('totalReferrals').textContent = userData.referrals;
+            document.getElementById('referralPoints').textContent = userData.referralPoints;
+            
+            // Mark completed tasks
+            tasks.forEach(task => {
+                const taskElement = document.getElementById(task.id);
+                if(userData.completedTasks.includes(task.id)) {
+                    taskElement.classList.add('task-completed');
+                    const button = taskElement.querySelector('button');
+                    button.disabled = true;
+                    button.textContent = 'Done';
+                }
+            });
+            
+            // Disable redeem buttons if not enough points
+            rewards.forEach(reward => {
+                const button = document.querySelector(`button[onclick="redeemReward(${reward.points}, '${reward.name}')"]`);
+                if(button) {
+                    button.disabled = userData.points < reward.points;
+                }
+            });
+        }
+        
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Deactivate all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionId + 'Section').classList.add('active');
+            
+            // Activate selected tab
+            event.target.classList.add('active');
+            
+            // Update UI
+            updateUI();
+        }
+        
+        function completeTask(taskId, pointsToAdd) {
+            // Check if already completed
+            if(userData.completedTasks.includes(taskId)) {
+                alert('You already completed this task!');
+                return;
+            }
+            
+            // Simulate task completion (in real app, this would verify completion)
+            setTimeout(() => {
+                userData.points += pointsToAdd;
+                userData.completedTasks.push(taskId);
+                saveUserData();
+                
+                // Update UI
+                updateUI();
+                
+                // Show completion message
+                const taskName = tasks.find(t => t.id === taskId).name;
+                alert(`Task completed!\n"${taskName}"\n+${pointsToAdd} points added to your account.`);
+            }, 1000);
+        }
+        
+        function copyReferralCode() {
+            const code = userData.referralCode;
+            navigator.clipboard.writeText(code).then(() => {
+                const successMsg = document.getElementById('referralSuccess');
+                successMsg.innerHTML = '✅ Referral code copied to clipboard!<br>Share it with your friends to earn 50 points each.';
+                successMsg.style.display = 'block';
+                setTimeout(() => successMsg.style.display = 'none', 5000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+        
+        function shareViaWhatsApp() {
+            const message = `Join EarnMax using my referral code ${userData.referralCode} and earn free rewards!`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+        }
+        
+        function shareViaFacebook() {
+            const message = `Join EarnMax using my referral code ${userData.referralCode} and earn free rewards!`;
+            window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}&quote=${encodeURIComponent(message)}`, '_blank');
+        }
+        
+        function copyReferralLink() {
+            const link = `${window.location.href}?ref=${userData.referralCode}`;
+            navigator.clipboard.writeText(link).then(() => {
+                const successMsg = document.getElementById('referralSuccess');
+                successMsg.innerHTML = '✅ Referral link copied!<br>Paste it anywhere to share with friends.';
+                successMsg.style.display = 'block';
+                setTimeout(() => successMsg.style.display = 'none', 5000);
+            });
+        }
+        
+        function redeemReward(pointsRequired, rewardName) {
+            if(userData.points < pointsRequired) {
+                alert(`You need ${pointsRequired - userData.points} more points to redeem this reward.`);
+                return;
+            }
+            
+            if(confirm(`Are you sure you want to redeem ${rewardName} for ${pointsRequired} points?`)) {
+                // Deduct points
+                userData.points -= pointsRequired;
+                
+                // Add to redeemed rewards
+                userData.redeemedRewards.push({
+                    name: rewardName,
+                    points: pointsRequired,
+                    date: new Date().toISOString(),
+                    code: generateRewardCode()
+                });
+                
+                saveUserData();
+                updateUI();
+                
+                // Show success message
+                const rewardCode = userData.redeemedRewards[userData.redeemedRewards.length - 1].code;
+                const successMsg = document.getElementById('redeemSuccess');
+                successMsg.innerHTML = `
+                    <h3>🎉 Reward Claimed Successfully!</h3>
+                    <p><strong>${rewardName}</strong></p>
+                    <p>Your code: <strong>${rewardCode}</strong></p>
+                    <p>${getDeliveryMessage(rewardName)}</p>
+                    <small>Redeemed on: ${new Date().toLocaleString()}</small>
+                `;
+                successMsg.style.display = 'block';
+                
+                // Scroll to success message
+                successMsg.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        function generateRewardCode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let result = '';
+            for (let i = 0; i < 10; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result;
+        }
+        
+        function getDeliveryMessage(rewardName) {
+            if(rewardName.includes('Paytm')) return 'Amount will be credited to your Paytm wallet within 24 hours.';
+            if(rewardName.includes('Amazon')) return 'Gift card will be emailed to you within 24 hours.';
+            if(rewardName.includes('Recharge')) return 'Please provide your mobile number when contacted by our team.';
+            if(rewardName.includes('Mystery')) return 'Your mystery reward details will be sent via email within 24 hours.';
+            return 'You will receive your reward within 24 hours.';
+        }
+        
+        // Check for referral in URL
+        function checkForReferral() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const refCode = urlParams.get('ref');
+            
+            if(refCode && refCode !== userData.referralCode) {
+                // In real app, you would verify the referral and credit points
+                alert(`You were referred by a friend! Use code ${refCode} when signing up.`);
+            }
+        }
+        
+        // Initialize referral check
+        checkForReferral();
+    </script>
+</body>
+</html>
